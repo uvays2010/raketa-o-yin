@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <!-- skill:chrome -->
+    <style>
+        /* Credit line — bottom-right */
+        .design-ui-credit {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            font: 11px/1 system-ui, sans-serif;
+            color: rgba(128, 128, 128, 0.5);
+            pointer-events: none;
+            z-index: 2147483647;
+            transition: opacity 0.4s ease;
+            user-select: none;
+            letter-spacing: 0.02em;
+        }
+
+        /* Hide chrome on touch devices */
+        @media (hover: none) {
+            .design-ui-credit {
+                display: none;
+            }
+        }
+
+        /* Print fixes */
+        @media print {
+            * {
+                transition: none !important;
+                animation: none !important;
+                box-shadow: none !important;
+            }
+
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .design-ui-credit {
+                display: none !important;
+            }
+        }
+    </style>
+    <script>
+        (function () {
+            // Chrome UI (hover devices only): credit badge with idle-fade.
+            // Deferred until body exists since the script may run in <head>.
+            function initChromeUI() {
+                if (!matchMedia('(hover: hover)').matches) return;
+
+                var credit = document.createElement('div');
+                credit.className = 'design-ui-credit';
+                credit.setAttribute('aria-hidden', 'true');
+                credit.innerHTML = '\u{1F49C} by ClickUp Brain';
+                document.body.appendChild(credit);
+
+                var timer = null;
+                var fade = function (out) { credit.style.opacity = out ? '0' : ''; };
+                fade(true);
+                var show = function () {
+                    fade(false);
+                    clearTimeout(timer);
+                    timer = setTimeout(function () { fade(true); }, 3000);
+                };
+                document.addEventListener('mousemove', show);
+                show();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initChromeUI);
+            } else {
+                initChromeUI();
+            }
+        })();
+
+    </script>
+    <!-- /skill:chrome -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Galaxy War: Infinity</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@200;300;400;500;600;700;800&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="preloader-content">
+            <div class="preloader-logo">GW</div>
+            <div class="preloader-bar-track">
+                <div class="preloader-bar-fill" id="preload-fill"></div>
+            </div>
+            <p class="preloader-text" id="preload-text">Loading assets...</p>
+        </div>
+    </div>
+
+    <!-- Menu Screen -->
+    <div id="menu-screen" class="screen">
+        <canvas id="menu-stars-canvas"></canvas>
+        <div class="menu-nebula"></div>
+        <div class="menu-content">
+            <div class="logo-container">
+                <h1 class="game-title" data-text="GALAXY WAR">GALAXY WAR</h1>
+                <p class="game-subtitle">I N F I N I T Y</p>
+                <div class="title-decoration">
+                    <span class="deco-line left"></span>
+                    <span class="deco-diamond"></span>
+                    <span class="deco-line right"></span>
+                </div>
+            </div>
+            <nav class="menu-nav">
+                <button id="btn-start" class="btn-neon primary" data-sound="click">
+                    <span class="btn-icon">▶</span>
+                    <span class="btn-text">START GAME</span>
+                </button>
+                <button id="btn-story" class="btn-neon" data-sound="click">
+                    <span class="btn-icon">📖</span>
+                    <span class="btn-text">STORY MODE</span>
+                </button>
+                <button id="btn-survival" class="btn-neon" data-sound="click">
+                    <span class="btn-icon">♾️</span>
+                    <span class="btn-text">SURVIVAL</span>
+                </button>
+                <button id="btn-hangar" class="btn-neon" data-sound="click">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">HANGAR</span>
+                </button>
+                <button id="btn-shop" class="btn-neon" data-sound="click">
+                    <span class="btn-icon">🏪</span>
+                    <span class="btn-text">SHOP</span>
+                </button>
+                <button id="btn-achievements" class="btn-neon" data-sound="click">
+                    <span class="btn-icon">🏆</span>
+                    <span class="btn-text">ACHIEVEMENTS</span>
+                </button>
+                <button id="btn-settings" class="btn-neon" data-sound="click">
+                    <span class="btn-icon">⚙️</span>
+                    <span class="btn-text">SETTINGS</span>
+                </button>
+            </nav>
+            <div class="menu-footer">
+                <div class="player-info">
+                    <span class="player-level">LV. 1</span>
+                    <span class="player-name">PILOT</span>
+                </div>
+                <div class="currency-display">
+                    <span class="currency gold"><i class="coin-icon"></i><span id="menu-gold">0</span></span>
+                    <span class="currency diamond"><i class="diamond-icon"></i><span id="menu-diamond">0</span></span>
+                    <span class="currency crystal"><i class="crystal-icon"></i><span id="menu-crystal">0</span></span>
+                </div>
+            </div>
+            <p class="controls-hint">WASD = Move | SPACE = Shoot | E = Ultimate | Q = Weapon Switch | R = Shield | TAB =
+                Stats</p>
+        </div>
+    </div>
+
+    <!-- Hangar Screen -->
+    <div id="hangar-screen" class="screen">
+        <canvas id="hangar-canvas"></canvas>
+        <div class="hangar-layout">
+            <div class="hangar-sidebar">
+                <h2 class="section-title">HANGAR</h2>
+                <div class="rocket-list" id="rocket-list">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+            <div class="hangar-main">
+                <div class="rocket-display">
+                    <canvas id="rocket-preview-canvas"></canvas>
+                    <div class="rocket-info">
+                        <h3 id="rocket-title">Basic Rocket</h3>
+                        <p id="rocket-desc" class="rocket-description">Standard issue spacecraft. Reliable and balanced.
+                        </p>
+                        <div class="rocket-rarity" id="rocket-rarity">COMMON</div>
+                    </div>
+                </div>
+                <div class="rocket-stats-grid" id="rocket-stats-grid">
+                    <!-- Generated by JS -->
+                </div>
+                <div class="hangar-actions">
+                    <button id="btn-equip" class="btn-neon primary">EQUIP</button>
+                    <button id="btn-upgrade-rocket" class="btn-neon">UPGRADE</button>
+                    <button id="btn-hangar-back" class="btn-neon secondary">BACK</button>
+                </div>
+            </div>
+            <div class="hangar-weapons">
+                <h3 class="subsection-title">WEAPONS</h3>
+                <div class="weapon-slots" id="weapon-slots">
+                    <!-- Generated by JS -->
+                </div>
+                <h3 class="subsection-title">SKILLS</h3>
+                <div class="skill-slots" id="skill-slots">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Screen -->
+    <div id="shop-screen" class="screen">
+        <canvas id="shop-canvas"></canvas>
+        <div class="shop-layout">
+            <div class="shop-header">
+                <h2 class="section-title">GALACTIC SHOP</h2>
+                <div class="shop-currency">
+                    <span class="currency gold"><i class="coin-icon"></i><span id="shop-gold">0</span></span>
+                    <span class="currency diamond"><i class="diamond-icon"></i><span id="shop-diamond">0</span></span>
+                </div>
+            </div>
+            <div class="shop-tabs">
+                <button class="shop-tab active" data-tab="rockets">Rockets</button>
+                <button class="shop-tab" data-tab="weapons">Weapons</button>
+                <button class="shop-tab" data-tab="skins">Skins</button>
+                <button class="shop-tab" data-tab="chests">Chests</button>
+                <button class="shop-tab" data-tab="currency">Currency</button>
+            </div>
+            <div class="shop-grid" id="shop-grid">
+                <!-- Generated by JS -->
+            </div>
+            <button id="btn-shop-back" class="btn-neon secondary small">BACK</button>
+        </div>
+    </div>
+
+    <!-- Achievements Screen -->
+    <div id="achievements-screen" class="screen">
+        <canvas id="ach-canvas"></canvas>
+        <div class="achievements-layout">
+            <h2 class="section-title">ACHIEVEMENTS</h2>
+            <div class="achievements-progress">
+                <span id="ach-count">0 / 50</span>
+                <div class="ach-progress-bar">
+                    <div class="ach-progress-fill" id="ach-fill"></div>
+                </div>
+            </div>
+            <div class="achievements-grid" id="achievements-grid">
+                <!-- Generated by JS -->
+            </div>
+            <button id="btn-ach-back" class="btn-neon secondary small">BACK</button>
+        </div>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="settings-screen" class="screen">
+        <canvas id="settings-canvas"></canvas>
+        <div class="settings-layout">
+            <h2 class="section-title">SETTINGS</h2>
+            <div class="settings-group">
+                <div class="setting-row">
+                    <span>Master Volume</span>
+                    <input type="range" min="0" max="100" value="80" id="vol-master" class="slider">
+                    <span class="slider-val" id="vol-master-val">80%</span>
+                </div>
+                <div class="setting-row">
+                    <span>Music Volume</span>
+                    <input type="range" min="0" max="100" value="60" id="vol-music" class="slider">
+                    <span class="slider-val" id="vol-music-val">60%</span>
+                </div>
+                <div class="setting-row">
+                    <span>SFX Volume</span>
+                    <input type="range" min="0" max="100" value="100" id="vol-sfx" class="slider">
+                    <span class="slider-val" id="vol-sfx-val">100%</span>
+                </div>
+                <div class="setting-row">
+                    <span>Graphics Quality</span>
+                    <select id="gfx-quality" class="select-neon">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high" selected>High</option>
+                        <option value="ultra">Ultra</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <span>Show FPS</span>
+                    <label class="toggle"><input type="checkbox" id="show-fps"><span
+                            class="toggle-slider"></span></label>
+                </div>
+                <div class="setting-row">
+                    <span>Screen Shake</span>
+                    <label class="toggle"><input type="checkbox" id="screen-shake" checked><span
+                            class="toggle-slider"></span></label>
+                </div>
+                <div class="setting-row">
+                    <span>Particles</span>
+                    <select id="particle-count" class="select-neon">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high" selected>High</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <span>Vibration</span>
+                    <label class="toggle"><input type="checkbox" id="vibration" checked><span
+                            class="toggle-slider"></span></label>
+                </div>
+                <div class="setting-row">
+                    <span>Auto Fire</span>
+                    <label class="toggle"><input type="checkbox" id="auto-fire"><span
+                            class="toggle-slider"></span></label>
+                </div>
+                <div class="setting-row">
+                    <span>Show Damage Numbers</span>
+                    <label class="toggle"><input type="checkbox" id="damage-numbers" checked><span
+                            class="toggle-slider"></span></label>
+                </div>
+            </div>
+            <div class="settings-actions">
+                <button id="btn-reset-settings" class="btn-neon danger small">RESET</button>
+                <button id="btn-settings-back" class="btn-neon secondary small">BACK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <canvas id="game-canvas"></canvas>
+
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-top-left">
+                <div class="hp-container">
+                    <div class="hp-icon">❤️</div>
+                    <div class="hp-bar-track">
+                        <div class="hp-bar-fill" id="hp-fill"></div>
+                        <span class="hp-text" id="hp-text">100/100</span>
+                    </div>
+                </div>
+                <div class="shield-container">
+                    <div class="shield-icon">🛡️</div>
+                    <div class="shield-bar-track">
+                        <div class="shield-bar-fill" id="shield-fill"></div>
+                        <span class="shield-text" id="shield-text">50/50</span>
+                    </div>
+                </div>
+                <div class="energy-container">
+                    <div class="energy-icon">⚡</div>
+                    <div class="energy-bar-track">
+                        <div class="energy-bar-fill" id="energy-fill"></div>
+                        <span class="energy-text" id="energy-text">100/100</span>
+                    </div>
+                </div>
+                <div class="xp-container">
+                    <div class="xp-bar-track">
+                        <div class="xp-bar-fill" id="xp-fill"></div>
+                        <span class="xp-text" id="xp-text">LV.1 — 0/100 XP</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-top-center">
+                <div class="level-indicator">
+                    <span class="level-planet" id="level-planet">🌍</span>
+                    <span class="level-name" id="level-name">Earth Orbit</span>
+                    <span class="level-number" id="level-number">1-1</span>
+                </div>
+                <div class="wave-indicator" id="wave-indicator">
+                    <span>WAVE <span id="wave-num">1</span> / <span id="wave-total">5</span></span>
+                </div>
+            </div>
+
+            <div class="hud-top-right">
+                <div class="score-display">
+                    <span class="score-label">SCORE</span>
+                    <span class="score-value" id="score-value">0</span>
+                </div>
+                <div class="combo-display" id="combo-display">
+                    <span class="combo-value" id="combo-value">x1</span>
+                    <div class="combo-bar-track">
+                        <div class="combo-bar-fill" id="combo-fill"></div>
+                    </div>
+                </div>
+                <div class="kill-counter">
+                    <span class="kill-icon">💀</span>
+                    <span id="kill-count">0</span>
+                </div>
+            </div>
+
+            <div class="hud-bottom-left">
+                <div class="weapon-display">
+                    <div class="weapon-icon" id="weapon-icon">🔫</div>
+                    <div class="weapon-info">
+                        <span class="weapon-name" id="weapon-name">Machine Gun</span>
+                        <span class="weapon-ammo" id="weapon-ammo">∞</span>
+                    </div>
+                </div>
+                <div class="secondary-weapon" id="secondary-weapon">
+                    <span class="sec-icon">🚀</span>
+                    <span class="sec-ammo" id="sec-ammo">3</span>
+                </div>
+            </div>
+
+            <div class="hud-bottom-center">
+                <div class="ultimate-display">
+                    <div class="ult-bar-track">
+                        <div class="ult-bar-fill" id="ult-fill"></div>
+                    </div>
+                    <span class="ult-label" id="ult-label">METEOR RAIN</span>
+                    <span class="ult-key">E</span>
+                </div>
+            </div>
+
+            <div class="hud-bottom-right">
+                <div class="minimap" id="minimap">
+                    <canvas id="minimap-canvas" width="120" height="120"></canvas>
+                </div>
+            </div>
+
+            <!-- FPS Counter -->
+            <div class="fps-counter" id="fps-counter">60 FPS</div>
+
+            <!-- Damage Numbers Container -->
+            <div id="damage-numbers"></div>
+
+            <!-- Notifications -->
+            <div id="notifications"></div>
+
+            <!-- Power-up Indicators -->
+            <div class="powerup-indicators" id="powerup-indicators"></div>
+        </div>
+
+        <!-- Boss HP Bar -->
+        <div id="boss-hud" class="hidden">
+            <div class="boss-info">
+                <span class="boss-title" id="boss-title">DESTROYER MK-I</span>
+                <span class="boss-phase" id="boss-phase">Phase 1/5</span>
+            </div>
+            <div class="boss-hp-track">
+                <div class="boss-hp-fill" id="boss-hp-fill"></div>
+                <div class="boss-hp-segments">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pause-screen" class="overlay hidden">
+            <h2>PAUSED</h2>
+            <div class="pause-stats">
+                <p>Score: <span id="pause-score">0</span></p>
+                <p>Time: <span id="pause-time">00:00</span></p>
+                <p>Kills: <span id="pause-kills">0</span></p>
+            </div>
+            <div class="overlay-buttons">
+                <button id="btn-resume" class="btn-neon primary">RESUME</button>
+                <button id="btn-restart" class="btn-neon">RESTART</button>
+                <button id="btn-quit" class="btn-neon secondary">QUIT</button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameover-screen" class="overlay hidden">
+            <h2 class="gameover-title">GAME OVER</h2>
+            <div class="gameover-stats">
+                <div class="stat-item"><span class="stat-label">Score</span><span class="stat-val"
+                        id="go-score">0</span></div>
+                <div class="stat-item"><span class="stat-label">Kills</span><span class="stat-val"
+                        id="go-kills">0</span></div>
+                <div class="stat-item"><span class="stat-label">Accuracy</span><span class="stat-val"
+                        id="go-accuracy">0%</span></div>
+                <div class="stat-item"><span class="stat-label">Max Combo</span><span class="stat-val"
+                        id="go-combo">x1</span></div>
+                <div class="stat-item"><span class="stat-label">Time</span><span class="stat-val"
+                        id="go-time">00:00</span></div>
+                <div class="stat-item"><span class="stat-label">Damage Done</span><span class="stat-val"
+                        id="go-damage">0</span></div>
+            </div>
+            <div class="gameover-rewards">
+                <span class="reward-item"><i class="coin-icon"></i>+<span id="go-gold">0</span></span>
+                <span class="reward-item"><i class="diamond-icon"></i>+<span id="go-diamonds">0</span></span>
+                <span class="reward-item">+<span id="go-xp">0</span> XP</span>
+            </div>
+            <div class="overlay-buttons">
+                <button id="btn-go-retry" class="btn-neon primary">RETRY</button>
+                <button id="btn-go-menu" class="btn-neon secondary">MENU</button>
+            </div>
+        </div>
+
+        <!-- Level Complete Screen -->
+        <div id="levelcomplete-screen" class="overlay hidden">
+            <div class="stars-earned" id="stars-earned">
+                <span class="star active">★</span>
+                <span class="star active">★</span>
+                <span class="star">★</span>
+            </div>
+            <h2 class="levelcomplete-title">LEVEL COMPLETE!</h2>
+            <div class="levelcomplete-stats">
+                <div class="stat-item"><span class="stat-label">Score</span><span class="stat-val"
+                        id="lc-score">0</span></div>
+                <div class="stat-item"><span class="stat-label">Kills</span><span class="stat-val"
+                        id="lc-kills">0</span></div>
+                <div class="stat-item"><span class="stat-label">Time</span><span class="stat-val"
+                        id="lc-time">00:00</span></div>
+                <div class="stat-item"><span class="stat-label">Accuracy</span><span class="stat-val"
+                        id="lc-accuracy">0%</span></div>
+            </div>
+            <div class="levelcomplete-rewards">
+                <span class="reward-item"><i class="coin-icon"></i>+<span id="lc-gold">0</span></span>
+                <span class="reward-item"><i class="diamond-icon"></i>+<span id="lc-diamonds">0</span></span>
+                <span class="reward-item">+<span id="lc-xp">0</span> XP</span>
+            </div>
+            <div class="overlay-buttons">
+                <button id="btn-next-level" class="btn-neon primary">NEXT LEVEL</button>
+                <button id="btn-lc-menu" class="btn-neon secondary">MENU</button>
+            </div>
+        </div>
+
+        <!-- Boss Warning -->
+        <div id="boss-warning" class="overlay hidden">
+            <div class="boss-warning-content">
+                <div class="warning-lines">
+                    <span class="warning-line"></span>
+                    <span class="warning-line"></span>
+                </div>
+                <h2 id="boss-warning-name">BOSS INCOMING</h2>
+                <p class="warning-flash">⚠ WARNING ⚠</p>
+                <div class="warning-lines">
+                    <span class="warning-line"></span>
+                    <span class="warning-line"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Achievement Popup -->
+        <div id="achievement-popup" class="hidden">
+            <div class="ach-popup-icon">🏆</div>
+            <div class="ach-popup-info">
+                <span class="ach-popup-title">Achievement Unlocked!</span>
+                <span class="ach-popup-name" id="ach-popup-name">First Blood</span>
+            </div>
+        </div>
+
+        <!-- Level Up Popup -->
+        <div id="levelup-popup" class="hidden">
+            <h3>LEVEL UP!</h3>
+            <span id="levelup-level">Level 2</span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
