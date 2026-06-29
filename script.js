@@ -936,39 +936,32 @@
     // BULLETS / WEAPONS
     // в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 
-    function shoot() {
-        const player = gameState.player;
-        const weapon = WEAPONS[player.weapon];
-        if (player.energy < 2) return;
+ function shoot() {
+    const player = gameState.player;
+    const weapon = WEAPONS[player.weapon];
+    if (player.energy < 2) return;
 
-        playSound('shoot');
-        player.energy -= 2;
-        gameState.shotsFired++;
+    playSound('shoot');
+    player.energy -= 2;
+    gameState.shotsFired++;
 
-        const multiShot = gameState.activePowerups.some(p => p.type === 'multiShot');
-        const rapidFire = gameState.activePowerups.some(p => p.type === 'rapidFire');
-        const doubleDamage = gameState.activePowerups.some(p => p.type === 'doubleDamage');
-        const count = multiShot ? 3 : 1;
-        const spread = multiShot ? 0.22 : weapon.spread || 0;
-        const damage = player.damage * (doubleDamage ? 2 : 1);
+    const doubleDamage = gameState.activePowerups.some(p => p.type === 'doubleDamage');
+    const damage = player.damage * (doubleDamage ? 2 : 1);
 
-        for (let i = 0; i < count; i++) {
-            const angle = -Math.PI / 2 + (i - (count - 1) / 2) * spread;
-            gameState.entities.bullets.push({
-                x: player.x + (i - 1) * 8,
-                y: player.y - player.h / 2,
-                vx: Math.cos(angle) * weapon.bulletSpeed,
-                vy: Math.sin(angle) * weapon.bulletSpeed,
-                r: weapon.id === 2 ? 5 : weapon.id === 3 ? 6 : 3,
-                color: player.color,
-                damage,
-                pierce: weapon.id === 5 ? 3 : 1,
-                weapon: weapon.id,
-            });
-        }
-
-        if (rapidFire) player.lastShot -= 80;
+    for (let i = -2; i <= 2; i++) {
+        gameState.entities.bullets.push({
+            x: player.x + i * 6,
+            y: player.y - player.h / 2,
+            vx: i * 0.8,
+            vy: -weapon.bulletSpeed,
+            r: 3,
+            color: player.color,
+            damage,
+            pierce: 1,
+            weapon: weapon.id,
+        });
     }
+}
 
     function switchWeapon() {
         const unlocked = gameState.inventory.weaponsUnlocked;
