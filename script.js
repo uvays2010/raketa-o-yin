@@ -1029,7 +1029,7 @@
         gameState.entities.enemyBullets.push({
             x: enemy.x, y: enemy.y,
             vx: Math.cos(ang) * 4,
-            vy: Math.sin(ang) * 4,
+            vy: Math.sin(ang) * 1,
             r: enemy.type === 3 ? 4 : 3,
             color: enemy.color,
             damage: enemy.type === 10 ? 18 : 8,
