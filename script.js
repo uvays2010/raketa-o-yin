@@ -841,9 +841,7 @@
         if (boss.invulnerable > 0) boss.invulnerable -= dt * 16.6667;
 
         // Movement
-        boss.x += boss.vx * dt;
-        if (boss.x < 80 || boss.x > canvas.width - 80) boss.vx *= -1;
-        boss.y = 100 + Math.sin(boss.timer * 0.02) * 20;
+
 
         // Phase system
         const phaseThreshold = boss.maxHp / boss.phases;
